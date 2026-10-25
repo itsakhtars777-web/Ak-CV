@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<link rel="icon" href="data:,"/>
+<title>AK CV — Professional CV Builder</title>
+<meta name="description" content="AK CV — Professional CV Builder. 5 professional templates, live preview, colour change and A4 PDF download. Apni CV banayen."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Fonts load async so a slow/blocked font CDN can never block the page from opening.
+     The page renders immediately with system fonts and swaps in the web fonts when ready. -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Archivo:wght@500;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Archivo:wght@500;700;800;900&display=swap" rel="stylesheet"></noscript>
+<!-- NOTE: html2pdf is intentionally NOT loaded here. It was a render-blocking ~800KB
+     script in <head>, so on a slow connection the whole page stayed blank and looked
+     like it "wasn't opening". It is now lazy-loaded only when Download PDF is tapped. -->
+<style>
+:root{
+  --bg:#f3f4f1; --panel:#ffffff; --panel2:#eef0ec; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --accent:#0f766e; --accent2:#134e4a; --gold:#c5a880;
+  --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#121413; --panel:#1c1f1e; --panel2:#242826; --text:#f3f4f6; --muted:#9ca3af; --line:#2e3331; }
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--text)}
+a{color:var(--accent)}
+button{cursor:pointer;font-family:inherit}
+input,textarea,select{font-family:inherit}
+
+/* Toolbar */
+.toolbar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:40px;height:40px;background:var(--accent);color:white;display:grid;place-items:center;border-radius:10px;font-weight:900;font-size:20px;letter-spacing:-1px}
+.brand h1{font-size:18px;margin:0;line-height:1;font-weight:800;letter-spacing:-.02em}
+.brand p{margin:3px 0 0;font-size:12px;color:var(--muted);font-weight:600}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);padding:9px 14px;border-radius:999px;font-weight:700;font-size:13px}
+.btn-primary{background:#111827;color:white;border-color:#111827}
+@media(prefers-color-scheme:dark){.btn-primary{background:#f9fafb;color:#111;border-color:#f9fafb}}
+.btn-teal{background:var(--accent);color:white;border-color:var(--accent)}
+.btn:hover{opacity:.92}
+
+/* Layout */
+.workspace{display:grid;grid-template-columns:430px 1fr;gap:0;align-items:start}
+@media(max-width:980px){.workspace{grid-template-columns:1fr}}
+.editor{background:var(--panel);border-right:1px solid var(--line);padding:18px 18px 40px;max-height:calc(100vh - 65px);overflow:auto;position:sticky;top:65px}
+@media(max-width:980px){.editor{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--line)}}
+.previewArea{padding:22px 18px 50px;overflow:auto}
+.previewTop{max-width:820px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.previewTop strong{font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.previewTop span{font-size:13px;color:var(--muted)}
+
+/* Editor blocks */
+.welcomeNote{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;padding:11px 12px;border-radius:12px;font-size:13px;line-height:1.5;margin-bottom:16px}
+@media(prefers-color-scheme:dark){.welcomeNote{background:#2a1a0a;border-color:#7c2d12;color:#fdba74}}
+.section{border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+.section-head{width:100%;display:flex;justify-content:space-between;align-items:center;padding:14px 14px;background:var(--panel2);border:none;font-weight:800;font-size:14px;color:var(--text);text-align:left}
+.section-body{padding:14px}
+label{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--muted);display:block;margin:10px 0 6px}
+label:first-child{margin-top:0}
+.field{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:14px;outline:none}
+.field:focus{border-color:var(--accent)}
+textarea.field{min-height:90px;resize:vertical;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.photoRow{display:flex;gap:12px;align-items:center}
+.avatarPrev{width:58px;height:58px;border-radius:50%;background:#e5e7eb;border:2px solid var(--line);flex-shrink:0;display:grid;place-items:center;font-size:22px;overflow:hidden}
+.avatarPrev img{width:100%;height:100%;object-fit:cover;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{font-size:12px;font-weight:700;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.entryCard{border:1px dashed var(--line);border-radius:12px;padding:12px;margin-bottom:12px;position:relative}
+.entryCard h4{margin:0 0 8px;font-size:13px}
+.removeBtn{position:absolute;right:10px;top:10px;border:none;background:#fef2f2;color:#dc2626;font-weight:800;font-size:12px;padding:6px 9px;border-radius:999px}
+.addBtn{width:100%;padding:11px;border:1.5px dashed var(--accent);color:var(--accent);background:transparent;border-radius:10px;font-weight:800;font-size:13px}
+.progress{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;background:var(--accent);transition:.3s}
+.templateGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tmplCard{border:2px solid var(--line);border-radius:12px;padding:10px;background:var(--panel);text-align:left}
+.tmplCard.active{border-color:var(--accent)}
+.tmplCard b{font-size:13px;display:block}
+.tmplCard span{font-size:12px;color:var(--muted);line-height:1.4;display:block;margin-top:2px}
+.tmplPreview{height:52px;border-radius:7px;margin-bottom:8px;border:1px solid #e5e7eb;overflow:hidden;position:relative}
+.colors{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.dot{width:32px;height:32px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 1px #ddd;cursor:pointer}
+.dot.active{box-shadow:0 0 0 2px var(--text)}
+input[type=color]{width:44px;height:32px;border:none;background:none;padding:0;cursor:pointer}
+
+/* RESUME SHEET - always white for print */
+.sheetWrap{display:flex;justify-content:center}
+#resumeSheet{--raccent:#0f766e;width:794px;max-width:100%;min-height:1050px;background:white;color:#111827;box-shadow:0 10px 40px rgba(0,0,0,.14);flex-shrink:0;overflow:hidden}
+#resumeSheet *{box-sizing:border-box}
+.r-name{line-height:.95}
+.r-sectionTitle{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;margin:0 0 10px}
+.r-item{margin-bottom:14px}
+.r-item h4{margin:0;font-size:14.5px}
+.r-item p{margin:4px 0 0;font-size:13px;line-height:1.6;color:#374151}
+.r-meta{font-size:12px;color:#6b7280;font-weight:600}
+.tag{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700;margin:0 6px 6px 0}
+.contactLine{font-size:12.5px;line-height:1.7}
+
+/* Template: Modern */
+.t-modern .head{background:var(--raccent);color:white;padding:28px 32px;display:flex;gap:20px;align-items:center}
+.t-modern .head img{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.7)}
+.t-modern .cols{display:grid;grid-template-columns:1.85fr 1fr;gap:0}
+.t-modern .mainCol{padding:24px 28px}
+.t-modern .sideCol{background:#f3f4f6;padding:24px 22px;min-height:700px}
+.t-modern .sideCol .r-sectionTitle{color:var(--raccent)}
+.t-modern .mainCol .r-sectionTitle{color:var(--raccent);border-bottom:2px solid var(--raccent);padding-bottom:6px}
+.t-modern .tag{background:white;border:1px solid #d1d5db;color:#111}
+
+/* Classic */
+.t-classic{font-family:"Lora",serif;padding:36px 42px}
+.t-classic .head{text-align:center;border-bottom:3px double #111;padding-bottom:18px}
+.t-classic .r-sectionTitle{text-align:left;border-bottom:1px solid #111;padding-bottom:6px;margin-top:22px;font-family:"Plus Jakarta Sans",sans-serif}
+.t-classic .tag{background:#f3f4f6;border:1px solid #e5e7eb}
+
+/* Minimal ATS */
+.t-minimal{font-family:Arial,Helvetica,sans-serif;padding:36px 40px}
+.t-minimal .head{border-bottom:2px solid #111;padding-bottom:14px}
+.t-minimal .r-sectionTitle{border-bottom:1px solid #9ca3af;padding-bottom:5px;margin-top:20px}
+.t-minimal .tag{background:none;border:none;padding:0;margin-right:4px;font-weight:400}
+.t-minimal .tag:after{content:" • "}
+
+/* Creative */
+.t-creative{display:grid;grid-template-columns:260px 1fr;padding:0;font-family:"Archivo",sans-serif}
+.t-creative .side{background:#111827;color:white;padding:28px 22px}
+.t-creative .side img{width:110px;height:110px;border-radius:18px;object-fit:cover;margin-bottom:16px}
+.t-creative .side .r-sectionTitle{color:#fbbf24}
+.t-creative .side p,.t-creative .side li{color:#d1d5db;font-size:13px;line-height:1.6}
+.t-creative .main{padding:28px 28px}
+.t-creative .main .r-sectionTitle{color:var(--raccent)}
+.t-creative .tag{background:#fef3c7;color:#92400e}
+
+/* Professional */
+.t-pro{padding:0}
+.t-pro .head{padding:26px 34px;display:flex;justify-content:space-between;gap:20px;border-top:8px solid var(--raccent)}
+.t-pro .body{padding:6px 34px 30px;display:grid;grid-template-columns:1fr 230px;gap:28px}
+.t-pro .r-sectionTitle{color:var(--raccent);display:flex;align-items:center;gap:8px}
+.t-pro .r-sectionTitle:before{content:"";width:22px;height:3px;background:var(--raccent);display:inline-block}
+.t-pro .tag{background:color-mix(in srgb, var(--raccent) 12%, white);color:#111;border:1px solid #e5e7eb}
+.timeline{border-left:2px solid #e5e7eb;padding-left:16px;margin-left:4px}
+.timeline .r-item{position:relative}
+.timeline .r-item:before{content:"";position:absolute;left:-22px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--raccent);border:2px solid white;box-shadow:0 0 0 1px #ddd}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#111827;color:white;padding:12px 16px;border-radius:999px;font-size:13px;font-weight:700;z-index:50;display:none;box-shadow:0 10px 30px rgba(0,0,0,.25);pointer-events:none;max-width:92vw;text-align:center}
+.footerNote{max-width:820px;margin:16px auto 0;font-size:12px;color:var(--muted);line-height:1.6;text-align:center}
+@media(max-width:640px){
+  .grid2{grid-template-columns:1fr}
+  .t-modern .cols,.t-pro .body{grid-template-columns:1fr}
+  .t-creative{grid-template-columns:1fr}
+  .t-modern .sideCol{min-height:auto}
+  #resumeSheet{min-height:auto}
+  .toolbar{position:static}
+  .editor{padding:14px}
+}
+@media print{
+  body{background:white}
+  .toolbar,.editor,.previewTop,.footerNote,.toast{display:none !important}
+  .workspace{display:block}
+  .previewArea{padding:0}
+  #resumeSheet{box-shadow:none;width:100%;max-width:none}
+}
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <div class="brand">
+    <div class="brand-mark">AK</div>
+    <div><h1>AK CV</h1><p>Professional CV Builder</p></div>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="loadSample()">Load Sample</button>
+    <button class="btn" onclick="clearAll()">Clear All</button>
+    <button class="btn btn-teal" onclick="downloadPDF()">⬇ Download PDF</button>
+  </div>
+</header>
+
+<div class="workspace">
+  <!-- EDITOR -->
+  <aside class="editor">
+    <div class="welcomeNote"><b>AK CV mein khush aamdeed.</b> Neeche ek sample CV bhara hua hai taaki aap design dekh saken. Apni details likhen — preview mein CV live update hoga. Koi bhi template aur colour chun kar PDF download karen.</div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:13px">CV Completeness</b><span id="compText" style="font-size:13px;font-weight:800;color:var(--accent)">0%</span></div>
+    <div class="progress"><i id="compBar" style="width:0%"></i></div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.5">Zyada complete CV = zyada professional impression. Photo, summary aur 2+ experiences add karen.</p>
+
+    <!-- Personal -->
+    <div class="section">
+      <button class="section-head" onclick="toggleSec(this)">1. Personal Details <span>▾</span></button>
+      <div class="section-body">
+        <div class="photoRow">
+          <div id="avatarPrev" class="avatarPrev" aria-label="Profile photo preview">👤</div>
+          <div style="flex:1"><label>Profile Photo</label><input type="file" id="photoInput" accept="image/*" class="field" style="padding:8px"></div>
+        </div>
+        <label>Full Name *</label><input id="f_name" class="field" placeholder="e.g. Muhammad Ali">
+        <label>Professional Title *</label><input id="f_title" class="field" placeholder="e.g. Graphic Designer / Student / Sales Executive">
+        <div class="grid2">
+          <div><label>Phone</label><input id="f_phone" class="field" placeholder="03xx-xxxxxxx"></div>
+          <div><label>Email</label><input id="f_email" class="field" placeholder="you@email.com"></div>
+        </div>
+        <label>City / Address</label><input id="f_address" class="field" placeholder="Lahore, Pakistan">
+        <label>LinkedIn / Website</label><input id="f_link" class="field" placeholder="linkedin.com/in/yourname">
+        <label>Professional Summary</label><textarea id="f_summary" class="field" placeholder="2-3 lines mein apne baare mein likhen: experience, strengths aur goal."></textarea>
+      </div>
+    </div>
+
+    <!-- Experience -->
+    <div class="section">
+      <button class="section-head" onclick="toggleSec(this)">2. Work Experience <span>▾</span></button>
+      <div class="section-body"><div id="expList"></div><button class="addBtn" onclick="addExp()">+ Add Experience / Internship</button>
+      <p style="font-size:12px;color:var(--muted)">Freshers internship, part-time job ya project bhi yahan likh sakte hain. Agar koi experience nahi, is section ko khali chhor den — CV mein show nahi hoga.</p></div>
+    </div>
+
+    <!-- Education -->
+    <div class="section">
+      <button class="section-head" onclick="toggleSec(this)">3. Education <span>▾</span></button>
+      <div class="section-body"><div id="eduList"></div><button class="addBtn" onclick="addEdu()">+ Add Education</button></div>
+    </div>
+
+    <!-- Skills -->
+    <div class="section">
+      <button class="section-head" onclick="toggleSec(this)">4. Skills & Languages <span>▾</span></button>
+      <div class="section-body">
+        <label>Skills (comma se alag karen)</label><textarea id="f_skills" class="field" style="min-height:64px" placeholder="MS Office, Canva, Communication, Sales, Urdu Typing"></textarea>
+        <div class="chips" id="skillChips"></div>
+        <label>Languages</label><input id="f_langs" class="field" placeholder="Urdu (Native), English (Fluent)">
+        <label>Certifications / Courses (optional)</label><textarea id="f_certs" class="field" style="min-height:56px" placeholder="Har line par ek certificate"></textarea>
+      </div>
+    </div>
+
+    <!-- Design -->
+    <div class="section">
+      <button class="section-head" onclick="toggleSec(this)">5. Design — Template & Colour <span>▾</span></button>
+      <div class="section-body">
+        <label>Choose Template</label>
+        <div class="templateGrid" id="templateGrid"></div>
+        <label style="margin-top:16px">Accent Colour</label>
+        <div class="colors" id="colorRow"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px"><input type="color" id="customColor" value="#0f766e"><span style="font-size:13px;font-weight:600">Custom colour pick karen</span></div>
+        <label style="margin-top:16px">Job Type — CV kis kaam ke liye hai?</label>
+        <select id="f_jobtype" class="field"><option>General / Any Job</option><option>Student / Internship</option><option>Office / Admin</option><option>Sales & Marketing</option><option>IT / Software</option><option>Design / Creative</option><option>Teaching</option><option>Driver / Delivery / Labour</option><option>Gulf / Overseas Job</option></select>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">💡 <b>Tip:</b> Bank, school ya government job ke liye <b>Classic / ATS</b> template best hai. Design ya marketing ke liye <b>Creative / Modern</b> use karen.</p>
+      </div>
+    </div>
+
+    <button class="btn btn-teal" style="width:100%;padding:14px;font-size:15px" onclick="downloadPDF()">Download Professional PDF →</button>
+    <p style="font-size:12px;color:var(--muted);text-align:center;line-height:1.6">PDF A4 size mein download hoga — print aur WhatsApp par bhejne ke liye ready.</p>
+  </aside>
+
+  <!-- PREVIEW -->
+  <main class="previewArea">
+    <div class="previewTop"><strong id="previewLabel">Live Preview — Modern</strong><span>Jaise likhenge, waise hi yahan banta jayega</span></div>
+    <div class="sheetWrap"><div id="resumeSheet"></div></div>
+    <p class="footerNote">AK CV — 5 professional templates ke saath apni CV banayen, colour badlen aur A4 PDF download karen. Print aur WhatsApp par bhejne ke liye bilkul ready.</p>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var templates=[
+ {id:'modern',name:'Modern',desc:'Sab se popular — har job ke liye',bg:'linear-gradient(90deg,#0f766e 38%,#fff 38%)'},
+ {id:'classic',name:'Classic',desc:'Bank, school, govt job ke liye',bg:'linear-gradient(180deg,#fff 60%,#ddd 60%)'},
+ {id:'minimal',name:'ATS Friendly',desc:'Online apply ke liye simple',bg:'linear-gradient(180deg,#111 12%,#fff 12%)'},
+ {id:'creative',name:'Creative',desc:'Design, media, marketing',bg:'linear-gradient(90deg,#111827 34%,#fef3c7 34%)'},
+ {id:'pro',name:'Professional',desc:'Experienced logo ke liye premium',bg:'linear-gradient(180deg,#0f766e 10%,#fff 10%)'}
+];
+var colors=['#0f766e','#1e3a5f','#7f1d1d','#111827','#065f46','#9a3412','#334155','#7c2d12'];
+var state={template:'modern',accent:'#0f766e',photo:''};
+var sampleSkills=['Canva & Social Media','MS Office (Word, Excel)','Customer Dealing','Urdu & English Typing','Sales & Negotiation','Teamwork'];
+
+function $(id){return document.getElementById(id)}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function toast(msg){var t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none'},2600)}
+function toggleSec(btn){var b=btn.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none'}
+
+function getData(){
+ return {
+  name:$('f_name').value.trim(), title:$('f_title').value.trim(), phone:$('f_phone').value.trim(), email:$('f_email').value.trim(),
+  address:$('f_address').value.trim(), link:$('f_link').value.trim(), summary:$('f_summary').value.trim(),
+  skills:$('f_skills').value.split(',').map(function(s){return s.trim()}).filter(Boolean),
+  langs:$('f_langs').value.trim(), certs:$('f_certs').value.split('\n').map(function(s){return s.trim()}).filter(Boolean),
+  exps:[], edus:[]
+ };
+}
+function collectDynamic(d){
+ document.querySelectorAll('#expList .entryCard').forEach(function(c){
+   d.exps.push({role:c.querySelector('.e-role').value,company:c.querySelector('.e-company').value,period:c.querySelector('.e-period').value,desc:c.querySelector('.e-desc').value});
+ });
+ document.querySelectorAll('#eduList .entryCard').forEach(function(c){
+   d.edus.push({degree:c.querySelector('.d-degree').value,school:c.querySelector('.d-school').value,year:c.querySelector('.d-year').value,grade:c.querySelector('.d-grade').value});
+ });
+ d.exps=d.exps.filter(function(e){return e.role||e.company}); d.edus=d.edus.filter(function(e){return e.degree||e.school});
+ return d;
+}
+function completeness(d){
+ var pts=0,total=10;
+ if(d.name)pts++; if(d.title)pts++; if(d.phone)pts++; if(d.email)pts++; if(d.summary)pts++; if(d.skills.length>=3)pts++; if(d.exps.length)pts++; if(d.edus.length)pts++; if(d.langs)pts++; if(state.photo)pts++;
+ var p=Math.round(pts/total*100); $('compBar').style.width=p+'%'; $('compText').textContent=p+'%';
+}
+function contactHTML(d,sep){
+ var parts=[d.phone,d.email,d.address,d.link].filter(Boolean); return parts.join(sep||' &nbsp;•&nbsp; ');
+}
+function expHTML(d){
+ return d.exps.map(function(e){return '<div class="r-item"><div style="display:flex;justify-content:space-between;gap:12px"><h4>'+esc(e.role)+(e.company?' — '+esc(e.company):'')+'</h4><span class="r-meta">'+esc(e.period)+'</span></div><p>'+esc(e.desc).replace(/\n/g,'<br>')+'</p></div>'}).join('');
+}
+function eduHTML(d){
+ return d.edus.map(function(e){return '<div class="r-item"><div style="display:flex;justify-content:space-between;gap:12px"><h4>'+esc(e.degree)+'</h4><span class="r-meta">'+esc(e.year)+'</span></div><p>'+esc(e.school)+(e.grade?' • '+esc(e.grade):'')+'</p></div>'}).join('');
+}
+function render(){
+ var d=collectDynamic(getData()); completeness(d);
+ var sheet=$('resumeSheet'); sheet.style.setProperty('--raccent',state.accent); sheet.className='';
+ var name=esc(d.name||'Your Name'), title=esc(d.title||'Professional Title');
+ var photo=state.photo?'<img src="'+state.photo+'" alt="Profile photo">':'';
+ var skillsTags=d.skills.map(function(s){return '<span class="tag">'+esc(s)+'</span>'}).join('');
+ var certs=d.certs.length?'<h3 class="r-sectionTitle">Certifications</h3>'+d.certs.map(function(c){return '<p style="font-size:13px;margin:0 0 6px">• '+esc(c)+'</p>'}).join(''):'';
+ var langs=d.langs?'<h3 class="r-sectionTitle">Languages</h3><p style="font-size:13px;line-height:1.6">'+esc(d.langs)+'</p>':'';
+ var summary=d.summary?'<h3 class="r-sectionTitle">Profile Summary</h3><p style="font-size:13.5px;line-height:1.7;color:#374151;margin:0 0 18px">'+esc(d.summary)+'</p>':'';
+ var expSec=d.exps.length?'<h3 class="r-sectionTitle">Work Experience</h3>'+expHTML(d):'';
+ var eduSec=d.edus.length?'<h3 class="r-sectionTitle">Education</h3>'+eduHTML(d):'';
+ var skillsSec=d.skills.length?'<h3 class="r-sectionTitle">Skills</h3><div>'+skillsTags+'</div>':'';
+
+ if(state.template==='modern'){
+   sheet.classList.add('t-modern');
+   sheet.innerHTML='<div class="head">'+photo+'<div><div class="r-name" style="font-size:36px;font-weight:900">'+name+'</div><div style="font-size:16px;font-weight:700;opacity:.92;margin-top:6px">'+title+'</div><div class="contactLine" style="margin-top:8px;opacity:.95">'+contactHTML(d)+'</div></div></div><div class="cols"><div class="mainCol">'+summary+expSec+eduSec+'</div><div class="sideCol">'+skillsSec+langs+certs+'</div></div>';
+ } else if(state.template==='classic'){
+   sheet.classList.add('t-classic');
+   sheet.innerHTML='<div class="head"><div class="r-name" style="font-size:34px;font-weight:700">'+name+'</div><div style="font-size:16px;margin-top:6px;color:#374151">'+title+'</div><div class="contactLine" style="margin-top:8px">'+contactHTML(d)+'</div></div>'+summary+expSec+eduSec+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px"><div>'+skillsSec+'</div><div>'+langs+certs+'</div></div>';
+ } else if(state.template==='minimal'){
+   sheet.classList.add('t-minimal');
+   sheet.innerHTML='<div class="head"><div style="font-size:30px;font-weight:700;text-transform:uppercase;letter-spacing:.02em">'+name+'</div><div style="font-size:15px;margin-top:4px">'+title+'</div><div class="contactLine" style="margin-top:6px">'+contactHTML(d,' | ')+'</div></div>'+summary+expSec+eduSec+(d.skills.length?'<h3 class="r-sectionTitle">Skills</h3><p style="font-size:13.5px">'+esc(d.skills.join(', '))+'</p>':'')+langs+certs+'<p style="font-size:11px;color:#6b7280;margin-top:24px">ATS-friendly format — no tables, no graphics, standard headings for online job portals.</p>';
+ } else if(state.template==='creative'){
+   sheet.classList.add('t-creative');
+   sheet.innerHTML='<div class="side">'+photo+'<div style="font-size:26px;font-weight:900;line-height:1">'+name+'</div><div style="color:#fbbf24;font-weight:800;margin:8px 0 18px">'+title+'</div><h3 class="r-sectionTitle">Contact</h3><p>'+contactHTML(d,'<br>')+'</p>'+(d.skills.length?'<h3 class="r-sectionTitle" style="margin-top:22px">Skills</h3>'+d.skills.map(function(s){return '<p style="margin:0 0 6px">▸ '+esc(s)+'</p>'}).join(''):'')+langs+'</div><div class="main">'+summary+expSec+eduSec+certs+'</div>';
+ } else {
+   sheet.classList.add('t-pro');
+   sheet.innerHTML='<div class="head"><div><div class="r-name" style="font-size:34px;font-weight:900;letter-spacing:-.02em">'+name+'</div><div style="font-size:16px;font-weight:700;color:var(--raccent);margin-top:5px">'+title+'</div></div>'+(state.photo?'<img src="'+state.photo+'" style="width:76px;height:76px;border-radius:50%;object-fit:cover" alt="Profile photo">':'')+'</div><div style="padding:0 34px 6px" class="contactLine">'+contactHTML(d)+'</div><div class="body"><div>'+summary+(d.exps.length?'<h3 class="r-sectionTitle">Experience</h3><div class="timeline">'+expHTML(d)+'</div>':'')+'</div><div>'+eduSec+skillsSec+langs+certs+'</div></div>';
+ }
+ $('previewLabel').textContent='Live Preview — '+templates.find(function(t){return t.id===state.template}).name;
+ $('avatarPrev').innerHTML=state.photo?'<img src="'+state.photo+'" alt="Profile photo">':'👤';
+}
+
+function expCard(e){
+ e=e||{}; var div=document.createElement('div'); div.className='entryCard';
+ div.innerHTML='<h4>Experience</h4><button class="removeBtn" onclick="this.parentElement.remove();render()">Remove</button><label>Job Title / Role</label><input class="field e-role" value="'+esc(e.role||'')+'" placeholder="Sales Officer"><label>Company / Shop / Organisation</label><input class="field e-company" value="'+esc(e.company||'')+'" placeholder="ABC Company, Lahore"><label>Period</label><input class="field e-period" value="'+esc(e.period||'')+'" placeholder="2023 — Present"><label>Kaam ki tafseel (1-3 lines)</label><textarea class="field e-desc" placeholder="Kya responsibilities theen, kya achieve kiya">'+esc(e.desc||'')+'</textarea>';
+ return div;
+}
+function eduCard(e){
+ e=e||{}; var div=document.createElement('div'); div.className='entryCard';
+ div.innerHTML='<h4>Education</h4><button class="removeBtn" onclick="this.parentElement.remove();render()">Remove</button><label>Degree / Class</label><input class="field d-degree" value="'+esc(e.degree||'')+'" placeholder="B.A / Intermediate / Matric"><label>School / College / University</label><input class="field d-school" value="'+esc(e.school||'')+'" placeholder="University of the Punjab"><div class="grid2"><div><label>Year</label><input class="field d-year" value="'+esc(e.year||'')+'" placeholder="2024"></div><div><label>Grade / Marks</label><input class="field d-grade" value="'+esc(e.grade||'')+'" placeholder="A Grade / 78%"></div></div>';
+ return div;
+}
+function addExp(data){$('expList').appendChild(expCard(data)); render()}
+function addEdu(data){$('eduList').appendChild(eduCard(data)); render()}
+
+function buildControls(){
+ $('templateGrid').innerHTML=templates.map(function(t){return '<button class="tmplCard '+(state.template===t.id?'active':'')+'" data-t="'+t.id+'"><div class="tmplPreview" style="background:'+t.bg+'"></div><b>'+t.name+'</b><span>'+t.desc+'</span></button>'}).join('');
+ document.querySelectorAll('.tmplCard').forEach(function(b){b.onclick=function(){state.template=b.dataset.t;buildControls();render()}});
+ $('colorRow').innerHTML=colors.map(function(c){return '<button class="dot '+(state.accent===c?'active':'')+'" style="background:'+c+'" data-c="'+c+'" aria-label="Colour '+c+'"></button>'}).join('');
+ document.querySelectorAll('.dot').forEach(function(b){b.onclick=function(){state.accent=b.dataset.c;$('customColor').value=state.accent;buildControls();render()}});
+ $('skillChips').innerHTML=sampleSkills.map(function(s){return '<button class="chip">+ '+s+'</button>'}).join('');
+ document.querySelectorAll('#skillChips .chip').forEach(function(ch,i){ch.onclick=function(){var cur=$('f_skills').value; $('f_skills').value=cur?(cur.replace(/,\s*$/,'')+', '+sampleSkills[i]):sampleSkills[i]; render()}});
+}
+function loadSample(silent){
+ $('f_name').value='Muhammad Ahmed'; $('f_title').value='Sales & Social Media Executive'; $('f_phone').value='0321-1234567'; $('f_email').value='ahmed.example@email.com'; $('f_address').value='Lahore, Pakistan'; $('f_link').value='linkedin.com/in/muhammad-ahmed';
+ $('f_summary').value='Motivated sales and social media executive with 2 years of experience in online selling, customer dealing and content promotion. Skilled in Canva, MS Office and building customer trust that turns into repeat sales.';
+ $('f_skills').value='Canva & Social Media, MS Office (Word, Excel), Customer Dealing, Sales & Negotiation, Urdu & English Typing'; $('f_langs').value='Urdu (Native), English (Fluent), Punjabi (Fluent)';
+ $('f_certs').value='Digital Marketing Course — DigiSkills\nComputer Course (CIT) — 6 Months';
+ $('expList').innerHTML=''; $('eduList').innerHTML='';
+ addExp({role:'Sales Executive',company:'Online Store — AirPods & Accessories',period:'2024 — Present',desc:'Handled online orders, WhatsApp customer chats and daily sales reporting. Helped increase repeat customers through fast response and honest product guidance.'});
+ addExp({role:'Social Media Assistant',company:'Local Clothing Brand, Lahore',period:'2023 — 2024',desc:'Made product posts in Canva, replied to comments and messages, and assisted in TikTok / Instagram promotions.'});
+ addEdu({degree:'Intermediate (F.A)',school:'Government College, Lahore',year:'2023',grade:'B Grade'});
+ addEdu({degree:'Matric (Science)',school:'Govt High School, Lahore',year:'2021',grade:'A Grade — 82%'});
+ if(!silent) toast('Sample CV load ho gaya — ab apni details se badal len'); render();
+}
+function clearAll(){
+ ['f_name','f_title','f_phone','f_email','f_address','f_link','f_summary','f_skills','f_langs','f_certs'].forEach(function(id){$(id).value=''});
+ $('expList').innerHTML=''; $('eduList').innerHTML=''; state.photo=''; addExp(); addEdu(); render(); toast('Sab clear ho gaya');
+}
+var pdfLibPromise=null;
+function loadPdfLib(){
+ if(typeof html2pdf!=='undefined') return Promise.resolve();
+ if(pdfLibPromise) return pdfLibPromise;
+ pdfLibPromise=new Promise(function(resolve,reject){
+   var s=document.createElement('script');
+   s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+   s.onload=function(){resolve()};
+   s.onerror=function(){pdfLibPromise=null;reject(new Error('load failed'))};
+   document.head.appendChild(s);
+   setTimeout(function(){ if(typeof html2pdf==='undefined'){pdfLibPromise=null;reject(new Error('timeout'))} },20000);
+ });
+ return pdfLibPromise;
+}
+function downloadPDF(){
+ render(); var el=$('resumeSheet'); var name=($('f_name').value.trim()||'My-Resume').replace(/\s+/g,'-');
+ toast('PDF ban raha hai…');
+ loadPdfLib().then(function(){
+   var opt={margin:0,filename:name+'-CV.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+   return html2pdf().set(opt).from(el).save();
+ }).then(function(){toast('PDF download ho gaya ✓')}).catch(function(){toast('PDF library load nahi hui — internet check karke dobara try karen')});
+}
+
+document.addEventListener('input',function(e){ if(e.target.id==='customColor'){state.accent=e.target.value; buildControls();} render(); });
+$('customColor').addEventListener('input',function(){state.accent=this.value; render()});
+$('photoInput').addEventListener('change',function(){
+ var f=this.files[0]; if(!f) return; var r=new FileReader(); r.onload=function(){state.photo=r.result; render()}; r.readAsDataURL(f);
+});
+buildControls(); loadSample(true);
+</script>
+</body>
+</html>
